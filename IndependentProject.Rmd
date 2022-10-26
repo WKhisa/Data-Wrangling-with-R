@@ -1,0 +1,108 @@
+---
+title: "Week 3 Data Wrangling with R - Independent Project"
+output: html_notebook
+---
+
+```{r}
+#### Install tidyverse packages in Rstudio
+install.packages("tidyverse")
+```
+
+```{r}
+#### Load tidyverse for use in our notebook
+library(tidyverse)
+```
+###1. Import Data and load entire dataframe
+
+```{r}
+###Import Data
+customer_data.df <- read_csv("https://bit.ly/2ZlpzjF")
+customer_data.df
+```
+
+### 2. Explore dafaframe to understand the data set
+```{r}
+### Understand the data set by previewing the data frames
+head(customer_data.df, 10)
+```
+
+```{r}
+str(customer_data.df)
+```
+
+```{r}
+dim(customer_data.df)
+```
+###3. Standardizing the data Set
+
+```{r}
+##Check for duplicate values in the dataframe
+customer_data.df[duplicated(customer_data.df), ]
+```
+
+##duplicate records were found in the dataset, thus shall be removed
+
+```{r}
+##Remove duplicate values in the dataframe, while creating new clean data frame
+customer_data.df <- customer_data.df[!duplicated(customer_data.df), ]
+```
+
+```{r}
+##Confirm deletion of duplicate values in the dataframe
+customer_data.df[duplicated(customer_data.df), ]
+```
+```{r}
+##Check missing values in the dataframe
+sum(is.na(customer_data.df))
+```
+##251 records have missing values, thus should be dropped from the dataframe.
+
+```{r}
+##Drop records with missing values
+customer_data.df <- na.omit(customer_data.df)
+```
+
+```{r}
+##Confirm missing values
+sum(is.na(customer_data.df))
+```
+```{r}
+##Check column names
+names(customer_data.df)
+```
+```{r}
+#Change column names to lower case
+names(customer_data.df) <- tolower(names(customer_data.df))
+names(customer_data.df)
+```
+
+```{r}
+##Confirm column name case
+names(customer_data.df)
+```
+##Analysis- Determine various churn scenarios
+```{r}
+##Count total number of churned customers
+table(customer_data.df$churn)
+```
+##Findings: 1863 customers have churned.
+
+```{r}
+##Churn analysis by gender
+customer_data.df %>%
+  filter (churn == 'Yes')%>%
+  group_by(gender) %>%
+  summarize(Total_Churn = length(churn))
+```
+##Findings: More Females than males churned service.
+
+
+```{r}
+##Churn analysis by Age Category
+customer_data.df %>%
+  filter (churn == 'Yes')%>%
+  group_by(seniorcitizen) %>%
+  summarize(Total_Churn = length(churn))
+```
+##Findings: Adult population more loyal than youth
+

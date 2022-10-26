@@ -1,0 +1,642 @@
+---
+title: "Data Wrangling and Analysis in R"
+output: html_notebook
+---
+
+
+## 1. Installing packages 
+In R, packages are a collection of functions that provide functinalities not given by the R core functionalities. We'll install tidyverse packages which will provide us with packages for performing data manipulation and analysis.
+
+#### Let's install tidyverse packages in Rstudio
+```{r}
+install.packages("tidyverse")
+```
+
+#### Load tidyverse for use in our notebook
+```{r}
+library(tidyverse)
+```
+
+## 2. Data Importation
+
+To work with a dataset, we need to import it and understand its  structure. Let's see how we can import a dataset from a URL, from a dataset within our current workspace and import a dataset while defining its separator. Once we import it we will load it into a dataframe.
+
+### 2.1 Examples 
+```{r}
+# a. Importing from a CSV file from URL and loading the entire dataframe.
+
+cities_df <- read_csv("http://bit.ly/CitiesDataset1")
+cities_df
+```
+
+```{r}
+# b. Importing from a CSV file from the current workspace and loading the entire dataframe.
+# Step 1) Navigate to current working directory using the File Pane on the bottom left section of R studio.
+# Step 2) Set the working directory by choosing in Rstudio Menu: Session > Set Working Directory > To files panes location.
+# Step 2) Download the dataset from http://bit.ly/CitiesDataset1 and using your computer's file manager, move it to your current working directory.
+# Step 3) In the code below, reading the dataset using the file name i.e. cities.csv
+
+cities_df <- read_csv("cities.csv")
+cities_df
+```
+
+
+```{r}
+# c. Importing a dataset from a CSV file while defining a separator ";", and then loading the entire dataframe. The dataset columns are separated by ";".
+
+df2 <- read_csv("http://bit.ly/DataCleaningDataset", sep=';')
+df2
+```
+
+### 2.2 Challenges
+```{r}
+# Challenge 1: Import the hotel bookings dataset from the URL: https://bit.ly/HotelBookingsDB and display the entire dataframe.
+
+```
+
+```{r}
+# Challenge 2: Import the hotel bookings dataset locally from your workspace. Download it from https://bit.ly/HotelBookingsDB and display the entire dataframe.
+
+```
+
+
+## 3. Data Understanding
+
+### 3.1 Examples
+```{r}
+# Let's use the head() function to preview the first 6 records of the cities dataset. We pass the dataframe name as the only argument.
+
+head(cities_df)
+```
+
+```{r}
+# We can preview a specific number of records by passing a second argument to the head() function:
+
+head(cities_df, 10)
+```
+
+```{r}
+# To preview the last 6 records of a dataset, we use the tail function, padding the dataframe name as the only argument.
+
+tail(cities_df)
+```
+
+```{r}
+# If we want to preview a specific number of last records, we pass a second argument to the tail function. Notice how the output displays chunks of 10 records.
+
+tail(cities_df, 20)
+```
+
+```{r}
+# The `glimpse()` function displays the variable names, datatypes and first few records of the dataset.
+
+glimpse(cities_df)
+
+```
+```{r}
+# In addition to what was printed using the glimpse function, if we want to display more information about the datatypes we can use the `str()` function and pass the dataframe name as the only argument.
+
+str(cities_df)
+```
+
+
+```{r}
+# Sometimes we might want to preview an unbiased number of dataset records. We use the sample_n() function and pass the dataframe name and number of samples as the arguments. 
+
+sample_n(cities_df, 10)
+```
+
+```{r}
+# Lastly, to quickly check the size of the dataset without displaying additional information, we use the `dim ()` function, passing the dataframe name as the only argument.
+
+dim(cities_df)
+```
+
+### 3.2 Challenges
+
+```{r}
+# Challenge 1: Preview the first 10 records of the hotel dataset.
+
+```
+
+```{r}
+# Challenge 2: Preview the last 30 records of the hotel dataset.
+
+```
+
+```{r}
+# Challenge 3: Take a guick glimpse at the hotel dataset variable names and datatypes.
+
+```
+
+```{r}
+# Challenge 4: Sample 10 records from the hotel dataset (with replacement).
+# Hint: Check the documentation.
+
+```
+
+```{r}
+# Challenge 5: Preview the dataset to see the variable names, datatypes and factor levels of the hotel dataset.
+
+```
+
+```{r}
+# Challenge 6: Using the hotel dataset, preview the number of records and variables of the hotel dataset.
+
+```
+
+
+## 4. Performing Standardisation
+
+To work easily with the columns, we update them to new ones with preferable column names.
+
+### 4.1 Examples
+```{r}
+# Get column names of the data cleaning dataset (http://bit.ly/DataCleaningDataset).
+names(df2)
+```
+
+```{r}
+# Update the existing column names with new ones that are stored in a vector.
+names(df2) <- c("name", "height", "weight", "account_a", "account_b", "total_account")
+names(df2)
+```
+
+```{r}
+# We can strip the leading and trailing spaces of column names using the `trimws()` function. For the arguments, we pass the column names vector and a vector with value "both" that defines that the leading and trailing spaces will be stripped. Note that this method transforms underscores to period characters.
+
+# Let's reload our original dataset so that we get use the original column names
+df2 <- read_csv("http://bit.ly/DataCleaningDataset", sep=';')
+head(df2)
+
+# Strip the leading and trailing spaces
+names(df2) <- trimws(names(df2), which = c("both"))
+names(df2)
+```
+
+```{r}
+# As a standard while working with colunn names we usually use lowercase characters. Let's transform all column names to have lowercase characters using the `tolower()` function. We pass a vector containing the column names to the function.
+
+names(df2) <- tolower(names(df2))
+names(df2)
+```
+
+### 4.2 Challenges
+```{r}
+# Challenge 1: Determine the column names of the hotel dataset.
+
+```
+
+```{r}
+# Challenge 2: Update the column names of the hotel dataset with lowercased column names defined in a vector.
+
+```
+
+```{r}
+# Challenge 3: Strip the leading and trailing spaces in column names of the hotel dataset. 
+
+```
+
+
+```{r}
+# Challenge 4: Lowercase the column names of the hotel dataset.
+
+```
+
+## 5. Handling Irrelevant Data
+
+We normally drop columns that will not be useful in our analysis.
+
+### 5.1 Examples
+```{r}
+# Let's drop the city and country columns in the data cleaning dataset using the `select()` function which will take the dataframe name and a vector of the columns we intend to exclude. We use `-` operator to define the column names we don't want.
+
+df2 = select(df2, -c("city", "country"))
+head(df2)
+```
+
+### 5.2 Challenges
+```{r}
+# Challenge 1: Drop the item visibility variable in the following dataset.
+# Dataset URL: https://bit.ly/ShoprityDS
+
+```
+
+## 6. Finding and dealing with Duplicates 
+
+Sometimes duplicates can mislead our analysis. Let's find and then leave the out from our data analysis dataset.
+
+```{r}
+# We'll use use the NBA dataset (http://bit.ly/NBABasketballDataset) for the examples.
+nba_df <- read_csv("http://bit.ly/NBABasketballDataset")
+head(nba_df)
+```
+
+```{r}
+# Let's determine the number of records using dim()
+dim(nba_df)
+```
+
+### 6.1 Examples
+```{r}
+# To extract the duplicated records from the dataset, we use x[duplicated(x),], where x is the dataframe name.
+
+nba_df[duplicated(nba_df), ]
+```
+
+```{r}
+# If we don't want to extract records which are not duplicates we add a logical negation `!` infront of the duplicated function.
+nba_df[!duplicated(nba_df), ]
+
+# or alternatively we can use the `unique()` function, passing the dataframe name as the argument.
+unique(nba_df)
+
+```
+
+```{r}
+# To remove duplicates based on a certain column we pass the definition of the column name as an argument to the duplicated() function.
+nba_df[!duplicated(nba_df$Team), ]
+
+```
+
+
+### 6.2 Challenges
+
+```{r}
+# Challenge 1: Find the duplicates in the following dataset: https://bit.ly/ShoprityDS 
+
+```
+
+```{r}
+# Challenge 2: Drop the duplicates in the dataset found in challenge 1.
+
+```
+
+
+## 7. Missing data
+
+To avoid wrong data analysis conclusions, we find and deal with missing data.
+
+### 7.1 Examples 
+```{r}
+# Let's create a dummy dataset that contains some missing data.
+
+name <- c("John", "Tim", NA)
+sex <- c("men", "men", "women")
+age <- c(45, 53, NA)
+dt <- data.frame(name, sex, age)
+dt
+
+```
+
+```{r}
+# We use the `is.na()` function to identify missing data and pass the dataframe. The output given has TRUE or FALSE to represent whether the value is missing or not.
+is.na(dt)
+
+```
+
+```{r}
+# To find the total missing values in each column we use the `colSums()` function and pass is.na(dt) as the argument and where `dt` is the dataframe.
+
+colSums(is.na(dt))
+```
+
+# Drop all rows containing missing values.
+```{r}
+# We can drop all records containing missing values using the na.omit() function and passing the dataframe name as the argument.
+na.omit(dt)
+
+```
+
+```{r}
+# To impute the missing values in a column with a number we use `x$y[isna(x$y)]` where `x` represents the dataset and `y` represents the column name.
+
+dt$age[is.na(dt$age)] <- 99
+```
+
+
+```{r}
+# If we want to replace the missing values in a column with the mean age, we use the `mean()` function and pass the column and  `na.rm = TRUE` as the arguments. `na.rm = TRUE` that we should exclude missing values when determining the mean.
+
+dt$age[is.na(dt$age)] <- mean(dt$age, na.rm = TRUE)
+dt
+```
+
+
+
+### 7.2 Challenges
+```{r}
+# Challenge 1: Find the number of missing values each column of the following transport dataset. Dataset URL: http://bit.ly/BusNairobiWesternTransport
+
+```
+
+```{r}
+# Challenge 2: Handle the missing values of the transport dataset in challenge 1.
+
+```
+
+
+## 8. Find and Dealing with Outliers
+
+Outliers can also have impact on the quality of analysis. Let's see how we can find and remove outliers from a dataset.
+
+### 8.1 Examples
+```{r}
+# Let's load and read the countries demographic dataset
+
+df <- read_csv("https://bit.ly/CountriesDemographicDataset")
+head(df)
+```
+
+```{r}
+# Then determine the number of records and variables
+dim(df)
+```
+
+```{r}
+# We'll use the outliers using the percentiles method: outliers based on varible "gdpPercap". We'll consider that all values that lie outside the interval formed by the 2.5 and 97.5 percentiles of "gdpPercap" will be considered as potential outliers. Consider the following reading for more information (Percentiles: https://statsandr.com/blog/outliers-detection-in-r/)   
+# Calculating lower and upper percentiles
+lower_bound <- quantile(df$gdpPercap, 0.025)
+upper_bound <- quantile(df$gdpPercap, 0.975)
+lower_bound
+upper_bound
+```
+
+
+```{r}
+# getting the outlier values
+
+outlier_values <- which(df$gdpPercap < lower_bound | df$gdpPercap > upper_bound)
+outlier_values
+```
+
+```{r}
+# getting the outlier records
+df[outlier_values,]
+```
+
+```{r}
+# Getting the values not outliers
+not_outlier_values <- which(df$gdpPercap > lower_bound & df$gdpPercap < upper_bound)
+not_outlier_values
+
+```
+
+```{r}
+# Getting records not outliers
+df[not_outlier_values,]
+
+```
+
+### 8.2 Challenges
+```{r}
+# Challenge 1: Finding the outliers based on the "mcg" variable in the yeast dataset. Dataset URL https://bit.ly/yeastdataset
+
+```
+
+```{r}
+# Challenge 2: Deal with the outliers found in challenge 1.
+
+```
+
+
+## 9. Filtering
+
+### 9.1 Examples 
+
+```{r}
+# Let's first import the dataset that we will use in the examples.
+iris_df <- read_csv("http://bit.ly/IrisDataset")
+head(iris_df)
+```
+
+```{r}
+# Selecting a single column
+# ---
+# Method 1: We can select a column using the `select()` function, passing the dataframe and column to be selected.
+
+select(iris_df, sepal_length)
+
+# Method 2: We can also define the dataset, use a pipe %>%, and then define the column column to be selected using the `select()` function.
+iris_df %>% 
+  select(sepal_length) 
+```
+
+```{r}
+# Selecting multiple columns
+# ---
+# Method 1: To select multple columns, we can use the `select()` function and then pass the dataframe and the dataframe names as arguments.
+
+select(iris_df, sepal_length, petal_length)
+
+# Method 2
+iris_df %>% 
+  select(sepal_length, petal_length)
+```
+
+```{r}
+# Method 1: To select a column with a condition, we use the `filter()` function and pass the dataframe and a condition as arguments.
+filter(iris_df, sepal_length > 5.0)
+
+# Method 2
+iris_df %>% 
+  filter(sepal_length > 5.0)
+
+```
+
+```{r}
+# Selecting multiple columns
+
+# Method 1
+selected_df <- filter(iris_df, sepal_length > 5.0)
+select(selected_df, sepal_length, sepal_width)
+
+# Method 2
+iris_df %>%
+  filter(sepal_length > 5.0) %>%
+  select(sepal_length, sepal_width)
+```
+
+```{r}
+# Let's see how we can create a new column using the `mutate()` function. The function takes the column name and the definition of how we compute it's values as the argument.
+iris_df %>% 
+  mutate(sl_sw = sepal_length / sepal_width)
+
+```
+
+```{r}
+# We can also create multiple columns and preview first 6 columns using multiple arguments and a `head()` function. The `mutate()` and `head()` functions are seperated by a pipe, %>%.
+
+# Create multiple columns and preview the first 6 columns
+iris_df %>% 
+  mutate(sl_pl = sepal_length / petal_length, 
+         pl_pw = petal_length / petal_width) %>% 
+  head()
+```
+
+```{r}
+# We can use the `select()` method while creating new columns to select certain columns only.
+
+iris_df %>% 
+  mutate(pl_sl = petal_length / sepal_length) %>%
+  select(sepal_length, sepal_width) %>%
+  head()
+```
+
+
+### 9.2 Challenges 
+```{r}
+# Challenge 1: Find records with outlets established in 2002 in the following dataset (https://bit.ly/ShoprityDS).
+
+```
+
+```{r}
+# Challenge 2: Select all the dairy records in the dataset in challenge 1.
+
+```
+
+```{r}
+# Challenge 3: From the dataset in challenge 1, how many records had outlet sales less than 2,000. Hint: use the `dim()` function while selecting the records.
+
+```
+
+```{r}
+# Challenge 4: From the dataset in challenge 1, get the records with outlet sales between 2,000 and 3,000.
+
+```
+
+
+
+## 10. Sorting
+
+### 10.1 Examples
+
+```{r}
+# Importing our dataset
+iris_df <- read_csv("http://bit.ly/IrisDataset")
+head(iris_df)
+```
+
+```{r}
+# Selecting and sorting by a column in ascending order using arrange()
+iris_df %>% 
+  select(sepal_length, petal_length) %>%
+  arrange(sepal_length)
+```
+
+```{r}
+# Selecting and sorting by a column in descending order using desc()
+iris_df %>% 
+  select(sepal_length, petal_length) %>%
+  arrange(desc(petal_length))
+```
+
+### 10.2 Challenges 
+
+```{r}
+# Challenge: Sort the items in the supermarket sales dataset by weight in descending order.
+
+```
+
+
+
+## 11. Summary tables
+
+### 11.1 Examples 
+
+```{r}
+# Importing our dataset
+df <- read_csv("https://bit.ly/2y5CRYc")
+head(df)
+```
+
+```{r}
+# grouping by and perform mean function
+df %>%
+  group_by(region) %>%
+  summarize(expenses = mean(expenses))
+```
+
+```{r}
+# grouping by multiple columns and applying sum function
+df %>%
+  group_by(sex, region) %>%
+  summarize(expenses = sum(expenses))
+```
+
+
+### 11.2 Challenges
+
+```{r}
+# Challenge 1: Given the following dataset: https://bit.ly/SuperMarketSalesDB, what was the average tax per city?
+
+```
+
+```{r}
+# Challenge 2: How much did female members from Yagon spend?
+
+```
+
+
+## 12. Merging
+
+### 12.1 Example 
+
+```{r}
+# Importing our dataset
+jn_df1 <- read_csv("https://bit.ly/joindataset1")
+jn_df2 <- read_csv("https://bit.ly/joindataset2")
+head(jn_df1)
+head(jn_df2)
+```
+
+
+```{r}
+# Joining the first table and the second table by their "SciName" columns using a left join
+jn_df1 %>% 
+  left_join(jn_df2, by = c("SciName" = "SciName")) 
+
+```
+
+
+### 12.2 Challenges
+
+```{r}
+# Challenge: 1. Merge the following datasets: 
+# Dataset 1: http://bit.ly/CitiesDataset
+# Dataset 2: http://bit.ly/CountriesDataset1
+
+```
+
+
+
+## 13. Concatenating 2 columns
+
+### 13.1 Examples
+
+```{r}
+# Importing our dataset
+concat_df <- read_csv("https://bit.ly/daydata")
+head(concat_df)
+
+```
+
+```{r}
+# Method 1:
+# Combining the `Name` and `Age` columns into `NameAge`
+concat_df %>% 
+  unite("NameAge", c("Name", "Age"), sep=", ")
+```
+
+```{r}
+# Challenge: Concatenate the city and state variables in the following dataset.
+# Dataset URL: http://bit.ly/SchoolShootingsDataset
+
+```
+
+
+
+
+
+
+
